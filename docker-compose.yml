@@ -61,6 +61,17 @@ services:
       pubsub-emulator:
         condition: service_started
 
+  streaming:
+    build: ./streaming
+    environment:
+      PUBSUB_PROJECT_ID: fossil-dev
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+    depends_on:
+      pubsub-emulator:
+        condition: service_started
+      mongo:
+        condition: service_started
+
   frontend:
     build: ./frontend
     volumes:

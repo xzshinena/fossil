@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface TreeNode {
+  id: number;
   name: string;
   health_score: number | null;
   partial: boolean;

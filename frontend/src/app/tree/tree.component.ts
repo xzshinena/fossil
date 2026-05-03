@@ -129,6 +129,7 @@ export class TreeComponent implements OnInit, OnDestroy {
       .append('g')
       .attr('class', 'node')
       .attr('data-name', d => d.data.name)
+      .attr('data-id', d => d.data.id)
       .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
 
     nodeEnter.append('circle');
@@ -164,9 +165,13 @@ export class TreeComponent implements OnInit, OnDestroy {
     return 4 + (score / 100) * 20;
   }
 
-  private _applyLiveUpdate(update: { language_id: number; delta: number }): void {
-    // Locate the node by language_id — requires enriching tree response in Week 3.
-    // For now, trigger a full re-render on any live update.
-    this._loadTree();
+  private _applyLiveUpdate(update: { language_id: number; new_score: number; sub_score_type: string }): void {
+    const node = this.g.select<SVGGElement>(`.node[data-id="${update.language_id}"]`);
+    if (node.empty()) return;
+
+    node.select<SVGCircleElement>('circle')
+      .transition().duration(150)
+      .attr('r', () => this._radius(update.new_score))
+      .attr('fill', () => this.colorScale(update.new_score));
   }
 }

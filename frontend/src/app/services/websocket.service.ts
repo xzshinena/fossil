@@ -4,8 +4,10 @@ import { environment } from '../../environments/environment';
 
 export interface ScoreUpdate {
   language_id: number;
+  language: string;
   sub_score_type: string;
   delta: number;
+  new_score: number;
   timestamp: string;
 }
 

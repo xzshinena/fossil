@@ -41,6 +41,7 @@ def tree_view(request):
     def build_node(lang):
         hs = scores.get(lang.id)
         return {
+            'id': lang.id,
             'name': lang.name,
             'health_score': hs.score if hs else None,
             'partial': hs.partial if hs else False,
