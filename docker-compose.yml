@@ -18,10 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085 --project=fossil-dev
+    ports:
+      - "8085:8085"
 
   backend:
     build: ./backend
@@ -31,12 +44,21 @@ services:
       - ./data:/app/data
     ports:
       - "8000:8000"
+    env_file: .env
     environment:
       DJANGO_SETTINGS_MODULE: fossil.settings.dev
+      GOOGLE_APPLICATION_CREDENTIALS: /app/data/gcp-credentials.json
+      MONGODB_URI: mongodb://mongo:27017/fossil
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+      PUBSUB_PROJECT_ID: fossil-dev
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_started
+      mongo:
+        condition: service_started
+      pubsub-emulator:
         condition: service_started
 
   frontend:
@@ -50,3 +72,4 @@ services:
 
 volumes:
   mysql_data:
+  mongo_data:

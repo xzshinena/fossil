@@ -11,7 +11,9 @@ class LanguageViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class HealthScoreViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = HealthScore.objects.select_related('language').order_by('language__name', 'year', 'month')
+    queryset = HealthScore.objects.select_related('language').order_by(
+        'language__name', 'year', 'month'
+    )
     serializer_class = HealthScoreSerializer
     filterset_fields = ['language', 'year', 'month']
 
@@ -43,7 +45,10 @@ def tree_view(request):
             'health_score': hs.score if hs else None,
             'partial': hs.partial if hs else False,
             'source_breakdown': hs.source_breakdown if hs else {},
-            'children': [build_node(child) for child in sorted(children_map[lang.id], key=lambda l: l.name)],
+            'children': [
+                build_node(child)
+                for child in sorted(children_map[lang.id], key=lambda lang: lang.name)
+            ],
         }
 
     if len(roots) == 1:
@@ -54,5 +59,5 @@ def tree_view(request):
         'health_score': None,
         'partial': False,
         'source_breakdown': {},
-        'children': [build_node(r) for r in sorted(roots, key=lambda l: l.name)],
+        'children': [build_node(r) for r in sorted(roots, key=lambda lang: lang.name)],
     })

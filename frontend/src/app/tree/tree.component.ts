@@ -123,7 +123,7 @@ export class TreeComponent implements OnInit, OnDestroy {
 
     // Nodes
     const nodeSel = this.g.selectAll<SVGGElement, d3.HierarchyPointNode<TreeNode>>('.node')
-      .data(root.descendants(), (d: d3.HierarchyPointNode<TreeNode>) => d.data.name);
+      .data(root.descendants(), (d: d3.HierarchyNode<TreeNode>) => d.data.name);
 
     const nodeEnter = nodeSel.enter()
       .append('g')

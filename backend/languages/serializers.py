@@ -15,4 +15,7 @@ class HealthScoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HealthScore
-        fields = ['id', 'language', 'language_name', 'year', 'month', 'score', 'partial', 'source_breakdown']
+        fields = [
+            'id', 'language', 'language_name',
+            'year', 'month', 'score', 'partial', 'source_breakdown',
+        ]

@@ -19,6 +19,7 @@ dist/
 # Data (large files; CSVs are downloaded locally, not committed)
 data/so_surveys/
 data/*.csv
+data/gcp-credentials.json
 
 # Docker
 .env

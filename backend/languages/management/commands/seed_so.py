@@ -197,7 +197,8 @@ class Command(BaseCommand):
 
                     month_index = (year - 2011) * 12 + (month - 1)
                     lang_start_index = (start_year - 2011) * 12
-                    progress = (month_index - lang_start_index) / max(total_months - lang_start_index, 1)
+                    denom = max(total_months - lang_start_index, 1)
+                    progress = (month_index - lang_start_index) / denom
 
                     base = start_score + (end_score - start_score) * progress
                     noise = rng.gauss(0, 2.5)

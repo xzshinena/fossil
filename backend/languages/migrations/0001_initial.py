@@ -11,7 +11,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Language',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True, primary_key=True, serialize=False, verbose_name='ID',
+                )),
                 ('name', models.CharField(max_length=100, unique=True)),
                 ('parent', models.ForeignKey(
                     blank=True, null=True,
@@ -25,7 +27,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='HealthScore',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(
+                    auto_created=True, primary_key=True, serialize=False, verbose_name='ID',
+                )),
                 ('year', models.IntegerField()),
                 ('month', models.IntegerField()),
                 ('score', models.FloatField(blank=True, null=True)),
@@ -45,6 +49,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='healthscore',
-            index=models.Index(fields=['language', 'year', 'month'], name='health_scor_languag_idx'),
+            index=models.Index(
+                fields=['language', 'year', 'month'], name='health_scor_languag_idx',
+            ),
         ),
     ]

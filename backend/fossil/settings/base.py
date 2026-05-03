@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -72,6 +73,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MONGODB_URI = os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/fossil')
+PUBSUB_PROJECT_ID = os.environ.get('PUBSUB_PROJECT_ID', 'fossil-dev')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
