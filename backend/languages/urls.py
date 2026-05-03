@@ -5,6 +5,7 @@ from . import views
 router = DefaultRouter()
 router.register(r'languages', views.LanguageViewSet)
 router.register(r'health-scores', views.HealthScoreViewSet)
+router.register(r'events', views.HistoricalEventViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Python lint ────────────────────────────────────────────────────────────
+  python-lint:
+    name: Python lint (flake8)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install flake8 flake8-annotations
+      - run: flake8 . --max-line-length=100 --exclude=migrations,__pycache__ --ignore=ANN,F403,E402
+
+  # ── Django tests ───────────────────────────────────────────────────────────
+  django-test:
+    name: Django tests (pytest)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: fossil
+          MYSQL_DATABASE: fossil
+          MYSQL_USER: fossil
+          MYSQL_PASSWORD: fossil
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -u fossil -pfossil"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DJANGO_SETTINGS_MODULE: fossil.settings.dev
+      PUBSUB_PROJECT_ID: fossil-dev
+      MONGODB_URI: mongodb://localhost:27017/fossil
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt pytest pytest-django
+      - run: pytest --tb=short -q
+
+  # ── Scala build ────────────────────────────────────────────────────────────
+  scala-build:
+    name: Scala build (sbt compile)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: streaming
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "11"
+          distribution: temurin
+      - name: Cache sbt
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-${{ hashFiles('streaming/build.sbt', 'streaming/project/**') }}
+          restore-keys: ${{ runner.os }}-sbt-
+      - name: Install sbt
+        run: |
+          curl -fsSL https://github.com/sbt/sbt/releases/download/v1.9.8/sbt-1.9.8.tgz \
+            | sudo tar xz -C /usr/local
+          echo "/usr/local/sbt/bin" >> $GITHUB_PATH
+      - run: sbt compile
+
+  # ── Angular lint + build ───────────────────────────────────────────────────
+  angular:
+    name: Angular lint + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build -- --configuration production
+
+  # ── Docker build check ─────────────────────────────────────────────────────
+  docker-build:
+    name: Docker build (backend + streaming)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: backend
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build streaming image
+        uses: docker/build-push-action@v5
+        with:
+          context: streaming
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

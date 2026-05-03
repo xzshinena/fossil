@@ -9,6 +9,32 @@
 
   <div class="slider-wrapper">
     <span class="slider-label">{{ displayDate }}</span>
+
+    <!-- Event annotation pins sit above the slider track -->
+    <div class="pins-track" aria-hidden="true">
+      <div
+        *ngFor="let evt of events"
+        class="event-pin"
+        [style.left]="pinLeft(evt)"
+        (mouseenter)="showTooltip(evt)"
+        (mouseleave)="hideTooltip()"
+        (click)="jumpToEvent(evt)"
+      >
+        <div class="pin-line"></div>
+        <div class="pin-dot"></div>
+
+        <div
+          class="pin-tooltip"
+          *ngIf="activeTooltip === evt"
+        >
+          <div class="tooltip-date">{{ evt.date | slice:0:7 }}</div>
+          <div class="tooltip-title">{{ evt.title }}</div>
+          <div class="tooltip-lang" *ngIf="evt.language_name">{{ evt.language_name }}</div>
+          <div class="tooltip-impact">{{ evt.impact_description }}</div>
+        </div>
+      </div>
+    </div>
+
     <input
       type="range"
       class="time-slider"

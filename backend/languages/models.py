@@ -36,3 +36,21 @@ class HealthScore(models.Model):
 
     def __str__(self):
         return f'{self.language.name} {self.year}/{self.month:02d}: {self.score}'
+
+
+class HistoricalEvent(models.Model):
+    date = models.DateField()
+    title = models.CharField(max_length=200)
+    language = models.ForeignKey(
+        Language, null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='events',
+    )
+    impact_description = models.TextField()
+
+    class Meta:
+        db_table = 'historical_events'
+        ordering = ['date']
+
+    def __str__(self):
+        return f'{self.date:%Y-%m} — {self.title}'

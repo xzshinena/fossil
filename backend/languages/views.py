@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Language, HealthScore
-from .serializers import LanguageSerializer, HealthScoreSerializer
+from .models import Language, HealthScore, HistoricalEvent
+from .serializers import LanguageSerializer, HealthScoreSerializer, HistoricalEventSerializer
 
 
 class LanguageViewSet(viewsets.ReadOnlyModelViewSet):
@@ -16,6 +16,11 @@ class HealthScoreViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = HealthScoreSerializer
     filterset_fields = ['language', 'year', 'month']
+
+
+class HistoricalEventViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = HistoricalEvent.objects.select_related('language').order_by('date')
+    serializer_class = HistoricalEventSerializer
 
 
 @api_view(['GET'])

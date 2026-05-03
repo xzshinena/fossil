@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 
 import { HealthService, TreeNode } from '../services/health.service';
 import { WebSocketService } from '../services/websocket.service';
+import { EventsService, HistoricalEvent } from '../services/events.service';
 
 const MIN_YEAR = 2011;
 const MAX_YEAR = 2024;
@@ -21,6 +22,8 @@ export class TreeComponent implements OnInit, OnDestroy {
 
   sliderValue = TOTAL_MONTHS - 1;  // default to Dec 2024
   connectionStatus: 'connected' | 'reconnecting' | 'disconnected' | null = null;
+  events: HistoricalEvent[] = [];
+  activeTooltip: HistoricalEvent | null = null;
 
   get displayDate(): string {
     const { year, month } = this._sliderToDate(this.sliderValue);
@@ -40,11 +43,35 @@ export class TreeComponent implements OnInit, OnDestroy {
   constructor(
     private health: HealthService,
     private ws: WebSocketService,
+    private eventsService: EventsService,
   ) {}
+
+  /** Convert an event date string (YYYY-MM-DD) to a slider index (0–167). */
+  eventSliderPos(event: HistoricalEvent): number {
+    const [year, month] = event.date.split('-').map(Number);
+    return (year - MIN_YEAR) * 12 + (month - 1);
+  }
+
+  /** Left % position of a pin on the slider track. */
+  pinLeft(event: HistoricalEvent): string {
+    return `${(this.eventSliderPos(event) / (TOTAL_MONTHS - 1)) * 100}%`;
+  }
+
+  showTooltip(event: HistoricalEvent): void { this.activeTooltip = event; }
+  hideTooltip(): void { this.activeTooltip = null; }
+
+  jumpToEvent(event: HistoricalEvent): void {
+    this.sliderValue = this.eventSliderPos(event);
+    this._loadTree();
+  }
 
   ngOnInit(): void {
     this._initSvg();
     this._loadTree();
+    this.eventsService.getEvents().subscribe({
+      next: res => this.events = res.results ?? [],
+      error: () => {},
+    });
 
     this.ws.connect();
     this.subs.add(

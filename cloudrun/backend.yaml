@@ -1,0 +1,44 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: fossil-backend
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "4"
+        run.googleapis.com/cloudsql-instances: "PROJECT_ID:REGION:fossil-mysql"
+    spec:
+      serviceAccountName: fossil-backend@PROJECT_ID.iam.gserviceaccount.com
+      containers:
+        - image: gcr.io/PROJECT_ID/fossil-backend:latest
+          ports:
+            - containerPort: 8000
+          command: ["daphne", "-b", "0.0.0.0", "-p", "8000", "fossil.asgi:application"]
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: fossil.settings.prod
+            - name: PUBSUB_PROJECT_ID
+              value: PROJECT_ID
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: fossil-mongodb-uri
+                  key: latest
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fossil-django-secret
+                  key: latest
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fossil-db-password
+                  key: latest
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi

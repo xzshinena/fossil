@@ -1,0 +1,62 @@
+[
+  {
+    "name": "language_id",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "FK to languages.id in MySQL"
+  },
+  {
+    "name": "language_name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Denormalised name for query convenience"
+  },
+  {
+    "name": "year",
+    "type": "INTEGER",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "month",
+    "type": "INTEGER",
+    "mode": "REQUIRED"
+  },
+  {
+    "name": "score",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Composite health score 0–100; NULL if all sources missing"
+  },
+  {
+    "name": "partial",
+    "type": "BOOLEAN",
+    "mode": "REQUIRED",
+    "description": "True when one or more source sub-scores are missing"
+  },
+  {
+    "name": "github_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "so_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "jobs_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "citations_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "ingested_at",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "When this row was written to BigQuery"
+  }
+]

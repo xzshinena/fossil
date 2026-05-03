@@ -1,0 +1,29 @@
+# Cloud Scheduler jobs for Fossil batch ETL.
+# Deploy with:
+#   gcloud scheduler jobs create http fossil-ingest-monthly \
+#     --schedule="0 3 1 * *" \
+#     --uri="https://BACKEND_URL/api/ingest/" \
+#     --http-method=POST \
+#     --oidc-service-account-email=fossil-scheduler@PROJECT_ID.iam.gserviceaccount.com \
+#     --time-zone="UTC"
+
+jobs:
+  - name: fossil-ingest-monthly
+    description: "Run full ETL pipeline on the 1st of each month at 03:00 UTC"
+    schedule: "0 3 1 * *"
+    timeZone: UTC
+    httpTarget:
+      uri: https://BACKEND_URL/ingest/run/
+      httpMethod: POST
+      oidcToken:
+        serviceAccountEmail: fossil-scheduler@PROJECT_ID.iam.gserviceaccount.com
+
+  - name: fossil-ingest-github-daily
+    description: "Incremental GitHub ingest daily at 04:00 UTC (current month only)"
+    schedule: "0 4 * * *"
+    timeZone: UTC
+    httpTarget:
+      uri: https://BACKEND_URL/ingest/run/?source=github&incremental=true
+      httpMethod: POST
+      oidcToken:
+        serviceAccountEmail: fossil-scheduler@PROJECT_ID.iam.gserviceaccount.com
