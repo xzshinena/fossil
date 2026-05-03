@@ -1,0 +1,172 @@
+import {
+  Component, ElementRef, OnDestroy, OnInit, ViewChild,
+} from '@angular/core';
+import { Subscription } from 'rxjs';
+import * as d3 from 'd3';
+
+import { HealthService, TreeNode } from '../services/health.service';
+import { WebSocketService } from '../services/websocket.service';
+
+const MIN_YEAR = 2011;
+const MAX_YEAR = 2024;
+const TOTAL_MONTHS = (MAX_YEAR - MIN_YEAR) * 12 + 12; // 168
+
+@Component({
+  selector: 'app-tree',
+  templateUrl: './tree.component.html',
+  styleUrls: ['./tree.component.css'],
+})
+export class TreeComponent implements OnInit, OnDestroy {
+  @ViewChild('treeContainer', { static: true }) containerRef!: ElementRef<HTMLDivElement>;
+
+  sliderValue = TOTAL_MONTHS - 1;  // default to Dec 2024
+  connectionStatus: 'connected' | 'reconnecting' | 'disconnected' | null = null;
+
+  get displayDate(): string {
+    const { year, month } = this._sliderToDate(this.sliderValue);
+    return `${year} / ${month.toString().padStart(2, '0')}`;
+  }
+
+  private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
+  private g!: d3.Selection<SVGGElement, unknown, null, undefined>;
+  private width = 0;
+  private height = 0;
+  private margin = { top: 30, right: 180, bottom: 30, left: 80 };
+
+  private colorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain([0, 100]);
+
+  private subs = new Subscription();
+
+  constructor(
+    private health: HealthService,
+    private ws: WebSocketService,
+  ) {}
+
+  ngOnInit(): void {
+    this._initSvg();
+    this._loadTree();
+
+    this.ws.connect();
+    this.subs.add(
+      this.ws.connectionStatus$.subscribe(s => this.connectionStatus = s)
+    );
+    this.subs.add(
+      this.ws.updates$.subscribe(update => this._applyLiveUpdate(update))
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.ws.disconnect();
+    this.subs.unsubscribe();
+  }
+
+  onSliderChange(): void {
+    this._loadTree();
+  }
+
+  private _sliderToDate(index: number): { year: number; month: number } {
+    return {
+      year: MIN_YEAR + Math.floor(index / 12),
+      month: (index % 12) + 1,
+    };
+  }
+
+  private _initSvg(): void {
+    const el = this.containerRef.nativeElement;
+    this.width = el.clientWidth || 960;
+    this.height = el.clientHeight || 620;
+
+    this.svg = d3.select(el)
+      .append('svg')
+      .attr('width', this.width)
+      .attr('height', this.height);
+
+    this.g = this.svg
+      .append('g')
+      .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
+  }
+
+  private _loadTree(): void {
+    const { year, month } = this._sliderToDate(this.sliderValue);
+    this.health.getTree(year, month).subscribe({
+      next: data => this._render(data),
+      error: err => console.error('tree fetch failed', err),
+    });
+  }
+
+  private _render(data: TreeNode): void {
+    const innerW = this.width - this.margin.left - this.margin.right;
+    const innerH = this.height - this.margin.top - this.margin.bottom;
+
+    const root = d3.hierarchy<TreeNode>(data);
+    const treeLayout = d3.tree<TreeNode>().size([innerH, innerW]);
+    treeLayout(root);
+
+    // Links
+    const linkSel = this.g.selectAll<SVGPathElement, d3.HierarchyLink<TreeNode>>('.link')
+      .data(root.links(), (d: d3.HierarchyLink<TreeNode>) =>
+        `${d.source.data.name}-${d.target.data.name}`);
+
+    linkSel.enter()
+      .append('path')
+      .attr('class', 'link')
+      .attr('fill', 'none')
+      .attr('stroke', '#30363d')
+      .attr('stroke-width', 1.5)
+      .merge(linkSel)
+      .transition().duration(150)
+      .attr('d', d3.linkHorizontal<d3.HierarchyLink<TreeNode>, d3.HierarchyPointNode<TreeNode>>()
+        .x(d => (d as any).y)
+        .y(d => (d as any).x) as any);
+
+    linkSel.exit().remove();
+
+    // Nodes
+    const nodeSel = this.g.selectAll<SVGGElement, d3.HierarchyPointNode<TreeNode>>('.node')
+      .data(root.descendants(), (d: d3.HierarchyPointNode<TreeNode>) => d.data.name);
+
+    const nodeEnter = nodeSel.enter()
+      .append('g')
+      .attr('class', 'node')
+      .attr('data-name', d => d.data.name)
+      .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
+
+    nodeEnter.append('circle');
+    nodeEnter.append('text');
+
+    const nodeMerge = nodeEnter.merge(nodeSel);
+
+    nodeMerge.transition().duration(150)
+      .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
+
+    nodeMerge.select<SVGCircleElement>('circle')
+      .transition().duration(150)
+      .attr('r', d => this._radius(d.data.health_score))
+      .attr('fill', d => d.data.health_score != null
+        ? this.colorScale(d.data.health_score)
+        : '#484f58')
+      .attr('stroke', '#58a6ff')
+      .attr('stroke-width', d => d.data.partial ? 1 : 0);
+
+    nodeMerge.select<SVGTextElement>('text')
+      .attr('dy', '0.35em')
+      .attr('x', (d: any) => d.children ? -14 : 14)
+      .attr('text-anchor', (d: any) => d.children ? 'end' : 'start')
+      .attr('fill', '#8b949e')
+      .attr('font-size', '11px')
+      .text(d => d.data.name);
+
+    nodeSel.exit().remove();
+  }
+
+  private _radius(score: number | null): number {
+    if (score == null) return 6;
+    return 4 + (score / 100) * 20;
+  }
+
+  private _applyLiveUpdate(update: { language_id: number; delta: number }): void {
+    // Locate the node by language_id — requires enriching tree response in Week 3.
+    // For now, trigger a full re-render on any live update.
+    this._loadTree();
+  }
+}

@@ -1,0 +1,42 @@
+<div class="fossil-wrapper">
+  <header class="fossil-header">
+    <h1 class="title">Fossil</h1>
+    <p class="subtitle">Language Evolution · 2011–2024</p>
+    <span *ngIf="connectionStatus === 'reconnecting'" class="reconnect-badge">Reconnecting…</span>
+  </header>
+
+  <div #treeContainer class="tree-container"></div>
+
+  <div class="slider-wrapper">
+    <span class="slider-label">{{ displayDate }}</span>
+    <input
+      type="range"
+      class="time-slider"
+      [min]="0"
+      [max]="167"
+      [(ngModel)]="sliderValue"
+      (input)="onSliderChange()"
+    />
+    <div class="slider-ends">
+      <span>Jan 2011</span>
+      <span>Dec 2024</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">Health score</span>
+    <svg width="160" height="12">
+      <defs>
+        <linearGradient id="legendGrad" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%"   stop-color="#d73027"/>
+          <stop offset="50%"  stop-color="#fee08b"/>
+          <stop offset="100%" stop-color="#1a9850"/>
+        </linearGradient>
+      </defs>
+      <rect width="160" height="12" fill="url(#legendGrad)" rx="2"/>
+    </svg>
+    <div class="legend-ticks">
+      <span>0</span><span>50</span><span>100</span>
+    </div>
+  </div>
+</div>

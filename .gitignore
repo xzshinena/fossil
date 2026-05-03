@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+*.js.map
+
+# Data (large files; CSVs are downloaded locally, not committed)
+data/so_surveys/
+data/*.csv
+
+# Docker
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

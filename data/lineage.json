@@ -1,0 +1,22 @@
+[
+  {"name": "Fortran",    "parent": null},
+  {"name": "COBOL",      "parent": null},
+  {"name": "Lisp",       "parent": null},
+  {"name": "C",          "parent": null},
+  {"name": "C++",        "parent": "C"},
+  {"name": "Java",       "parent": "C++"},
+  {"name": "Perl",       "parent": "C"},
+  {"name": "Python",     "parent": "C"},
+  {"name": "PHP",        "parent": "Perl"},
+  {"name": "Ruby",       "parent": "Perl"},
+  {"name": "JavaScript", "parent": "C"},
+  {"name": "TypeScript", "parent": "JavaScript"},
+  {"name": "Scala",      "parent": "Java"},
+  {"name": "Kotlin",     "parent": "Java"},
+  {"name": "Swift",      "parent": "C"},
+  {"name": "Go",         "parent": "C"},
+  {"name": "Rust",       "parent": "C++"},
+  {"name": "Haskell",    "parent": "Lisp"},
+  {"name": "R",          "parent": "Lisp"},
+  {"name": "Julia",      "parent": "Lisp"}
+]
