@@ -11,7 +11,6 @@ If no CSVs are found, synthetic trend data is generated so the tree
 renders immediately without any downloads.
 """
 import json
-import os
 import random
 from pathlib import Path
 

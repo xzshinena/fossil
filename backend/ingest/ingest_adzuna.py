@@ -63,7 +63,9 @@ def _search_jobs(lang: str, retries: int = 5) -> int:
         try:
             resp = requests.get(url, params=params, timeout=15)
             if resp.status_code == 429:
-                logger.warning('Adzuna 429 for %s — sleeping %ds (attempt %d)', lang, delay, attempt + 1)
+                logger.warning(
+                    'Adzuna 429 for %s — sleeping %ds (attempt %d)', lang, delay, attempt + 1
+                )
                 time.sleep(delay)
                 delay = min(delay * 2, 60)
                 continue

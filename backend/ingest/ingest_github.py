@@ -9,7 +9,6 @@ Run standalone:
 """
 import logging
 import os
-import sys
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ def run(start_year: int = START_YEAR, end_year: int = END_YEAR) -> int:
 
     lang_id_map = {lang.name.lower(): lang.id for lang in Language.objects.all()}
     client = bigquery.Client()
-    lang_list = ', '.join(f"'{l.lower()}'" for l in LANGUAGES)
+    lang_list = ', '.join(f"'{lang.lower()}'" for lang in LANGUAGES)
     total = 0
 
     for year in range(start_year, end_year + 1):
@@ -75,7 +74,7 @@ def run(start_year: int = START_YEAR, end_year: int = END_YEAR) -> int:
         for row in rows:
             if not row.language or row.push_count is None:
                 continue
-            doc = upsert_raw(
+            upsert_raw(
                 source='github',
                 language=row.language,
                 year=int(row.year),
