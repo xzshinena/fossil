@@ -27,37 +27,19 @@ jobs:
   django-test:
     name: Django tests (pytest)
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: fossil
-          MYSQL_DATABASE: fossil
-          MYSQL_USER: fossil
-          MYSQL_PASSWORD: fossil
-        ports: ["3306:3306"]
-        options: >-
-          --health-cmd="mysqladmin ping -u fossil -pfossil"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-      mongo:
-        image: mongo:7
-        ports: ["27017:27017"]
     defaults:
       run:
         working-directory: backend
     env:
-      DJANGO_SETTINGS_MODULE: fossil.settings.dev
+      DJANGO_SETTINGS_MODULE: fossil.settings.test
       PUBSUB_PROJECT_ID: fossil-dev
-      MONGODB_URI: mongodb://localhost:27017/fossil
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install -r requirements.txt pytest pytest-django
+      - run: pip install -r requirements.txt
       - run: pytest --tb=short -q
 
   # ── Scala build ────────────────────────────────────────────────────────────
