@@ -11,6 +11,7 @@ import { EventsService, HistoricalEvent } from '../services/events.service';
 const MIN_YEAR = 2011;
 const MAX_YEAR = 2024;
 const TOTAL_MONTHS = (MAX_YEAR - MIN_YEAR) * 12 + 12; // 168
+const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 150;
 
 @Component({
   selector: 'app-tree',
@@ -143,7 +144,7 @@ export class TreeComponent implements OnInit, OnDestroy {
       .attr('stroke', '#30363d')
       .attr('stroke-width', 1.5)
       .merge(linkSel)
-      .transition().duration(150)
+      .transition().duration(TRANSITION_DURATION)
       .attr('d', d3.linkHorizontal<d3.HierarchyLink<TreeNode>, d3.HierarchyPointNode<TreeNode>>()
         .x(d => (d as any).y)
         .y(d => (d as any).x) as any);
@@ -166,11 +167,11 @@ export class TreeComponent implements OnInit, OnDestroy {
 
     const nodeMerge = nodeEnter.merge(nodeSel);
 
-    nodeMerge.transition().duration(150)
+    nodeMerge.transition().duration(TRANSITION_DURATION)
       .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
 
     nodeMerge.select<SVGCircleElement>('circle')
-      .transition().duration(150)
+      .transition().duration(TRANSITION_DURATION)
       .attr('r', d => this._radius(d.data.health_score))
       .attr('fill', d => d.data.health_score != null
         ? this.colorScale(d.data.health_score)
@@ -199,7 +200,7 @@ export class TreeComponent implements OnInit, OnDestroy {
     if (node.empty()) return;
 
     node.select<SVGCircleElement>('circle')
-      .transition().duration(150)
+      .transition().duration(TRANSITION_DURATION)
       .attr('r', () => this._radius(update.new_score))
       .attr('fill', () => this.colorScale(update.new_score));
   }
