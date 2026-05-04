@@ -1,6 +1,7 @@
 package fossil
 
 import zio._
+import fossil.Config
 
 object Main extends ZIOAppDefault {
   override def run: ZIO[ZIOAppArgs & Scope, Any, Any] = {

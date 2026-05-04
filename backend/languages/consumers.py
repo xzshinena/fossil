@@ -3,41 +3,29 @@ import json
 import os
 
 from channels.generic.websocket import AsyncWebsocketConsumer
+from google.cloud import pubsub_v1
 from google.api_core.exceptions import GoogleAPICallError
-from google.auth.credentials import AnonymousCredentials
-from google.cloud.pubsub_v1.services.subscriber.async_client import SubscriberAsyncClient
-from google.cloud.pubsub_v1.services.subscriber.transports.grpc_asyncio import (
-    SubscriberGrpcAsyncIOTransport,
-)
-from google.pubsub_v1.types import PullRequest, AcknowledgeRequest, Subscription
 
 PROJECT_ID = os.environ.get('PUBSUB_PROJECT_ID', 'fossil-dev')
 SUBSCRIPTION = 'django-score-updates'
 TOPIC = 'score-updates'
-EMULATOR_HOST = os.environ.get('PUBSUB_EMULATOR_HOST', '')
 
 
-def _make_client() -> SubscriberAsyncClient:
-    if EMULATOR_HOST:
-        transport = SubscriberGrpcAsyncIOTransport(
-            host=EMULATOR_HOST,
-            credentials=AnonymousCredentials(),
-            options=[('grpc.enable_http_proxy', 0)],
-        )
-        return SubscriberAsyncClient(transport=transport)
-    return SubscriberAsyncClient()
+def _make_client() -> pubsub_v1.SubscriberClient:
+    # PUBSUB_EMULATOR_HOST env var is auto-detected by the library
+    return pubsub_v1.SubscriberClient()
 
 
-async def _ensure_subscription(client: SubscriberAsyncClient) -> str:
+def _ensure_subscription(client: pubsub_v1.SubscriberClient) -> str:
     sub_path = client.subscription_path(PROJECT_ID, SUBSCRIPTION)
     topic_path = f'projects/{PROJECT_ID}/topics/{TOPIC}'
     try:
-        await client.create_subscription(
-            request=Subscription(
-                name=sub_path,
-                topic=topic_path,
-                ack_deadline_seconds=20,
-            )
+        client.create_subscription(
+            request={
+                'name': sub_path,
+                'topic': topic_path,
+                'ack_deadline_seconds': 20,
+            }
         )
     except Exception:
         pass  # already exists
@@ -57,15 +45,20 @@ class ScoreUpdateConsumer(AsyncWebsocketConsumer):
             pass
 
     async def _pull_loop(self):
-        client = _make_client()
-        sub_path = await _ensure_subscription(client)
+        loop = asyncio.get_event_loop()
+        client = await loop.run_in_executor(None, _make_client)
+        sub_path = await loop.run_in_executor(None, _ensure_subscription, client)
+
         while True:
             try:
-                response = await client.pull(
-                    request=PullRequest(
-                        subscription=sub_path,
-                        max_messages=10,
-                    )
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: client.pull(
+                        request={
+                            'subscription': sub_path,
+                            'max_messages': 10,
+                        }
+                    ),
                 )
                 messages = response.received_messages
                 if not messages:
@@ -78,11 +71,14 @@ class ScoreUpdateConsumer(AsyncWebsocketConsumer):
                     except Exception:
                         pass
                 ack_ids = [m.ack_id for m in messages]
-                await client.acknowledge(
-                    request=AcknowledgeRequest(
-                        subscription=sub_path,
-                        ack_ids=ack_ids,
-                    )
+                await loop.run_in_executor(
+                    None,
+                    lambda: client.acknowledge(
+                        request={
+                            'subscription': sub_path,
+                            'ack_ids': ack_ids,
+                        }
+                    ),
                 )
             except asyncio.CancelledError:
                 raise

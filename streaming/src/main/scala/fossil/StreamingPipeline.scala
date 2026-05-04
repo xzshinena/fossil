@@ -10,6 +10,7 @@ import io.circe.syntax._
 import org.slf4j.LoggerFactory
 import zio._
 import zio.interop.reactivestreams._
+import fossil.Config
 
 import java.time.Instant
 
@@ -31,7 +32,7 @@ object StreamingPipeline {
       // Parse JSON bytes → RawEvent via Akka flow (CPU-bound, stays on Akka dispatcher)
       parsedSrc   = akkaSource.via(parseFlow)
       reactPub    = parsedSrc.runWith(Sink.asPublisher(fanout = false))
-      zioStream   = reactPub.toZIOStream(bufferSize = 32)
+      zioStream   = reactPub.toZIOStream(32)
       _          <- zioStream
                       .mapZIO { event =>
                         RollingWindow

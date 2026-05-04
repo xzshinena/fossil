@@ -66,9 +66,10 @@ object PubSubSource {
   }
 
   def ensureSubscription(stub: GrpcSubscriberStub, config: Config): Unit = {
+    ensureTopic(config, config.rawEventsTopic)
     val subPath = ProjectSubscriptionName.format(config.projectId, config.rawEventsSubscription)
     val topicPath = ProjectTopicName.format(config.projectId, config.rawEventsTopic)
-    val req = Subscription.newBuilder()
+    val req = com.google.pubsub.v1.Subscription.newBuilder()
       .setName(subPath)
       .setTopic(topicPath)
       .setAckDeadlineSeconds(20)
