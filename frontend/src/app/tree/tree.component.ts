@@ -24,6 +24,7 @@ export class TreeComponent implements OnInit, OnDestroy {
   connectionStatus: 'connected' | 'reconnecting' | 'disconnected' | null = null;
   events: HistoricalEvent[] = [];
   activeTooltip: HistoricalEvent | null = null;
+  treeEmpty = true;
 
   get displayDate(): string {
     const { year, month } = this._sliderToDate(this.sliderValue);
@@ -122,6 +123,7 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   private _render(data: TreeNode): void {
+    this.treeEmpty = false;
     const innerW = this.width - this.margin.left - this.margin.right;
     const innerH = this.height - this.margin.top - this.margin.bottom;
 

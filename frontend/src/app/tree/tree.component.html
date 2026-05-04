@@ -5,7 +5,12 @@
     <span *ngIf="connectionStatus === 'reconnecting'" class="reconnect-badge">Reconnecting…</span>
   </header>
 
-  <div #treeContainer class="tree-container"></div>
+  <div #treeContainer class="tree-container">
+    <div class="tree-empty" *ngIf="treeEmpty">
+      <span class="tree-empty-icon">◎</span>
+      <span class="tree-empty-text">Waiting for data…</span>
+    </div>
+  </div>
 
   <div class="slider-wrapper">
     <span class="slider-label">{{ displayDate }}</span>
