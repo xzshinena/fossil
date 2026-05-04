@@ -3,6 +3,7 @@
     <h1 class="title">Fossil</h1>
     <p class="subtitle">Language Evolution · 2011–2024</p>
     <span *ngIf="connectionStatus === 'reconnecting'" class="reconnect-badge">Reconnecting…</span>
+    <span *ngIf="connectionStatus === 'disconnected'" class="disconnected-badge">Live updates paused</span>
   </header>
 
   <div #treeContainer class="tree-container">
