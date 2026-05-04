@@ -90,6 +90,13 @@
   width: 100%;
   cursor: pointer;
   accent-color: #58a6ff;
+  padding: 14px 0;
+}
+
+.time-slider:focus-visible {
+  outline: 2px solid #58a6ff;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .slider-ends {
