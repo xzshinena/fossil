@@ -47,6 +47,8 @@
       [max]="167"
       [(ngModel)]="sliderValue"
       (input)="onSliderChange()"
+      aria-label="Timeline"
+      [attr.aria-valuetext]="displayDate"
     />
     <div class="slider-ends">
       <span>Jan 2011</span>
