@@ -74,7 +74,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        data_dir = Path(__file__).resolve().parents[6] / 'data'
+        data_dir = Path(__file__).resolve().parents[3] / 'data'
         lineage_path = data_dir / 'lineage.json'
         surveys_dir = data_dir / 'so_surveys'
 
