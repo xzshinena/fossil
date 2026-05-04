@@ -69,7 +69,7 @@ export class TreeComponent implements OnInit, OnDestroy {
     this._initSvg();
     this._loadTree();
     this.eventsService.getEvents().subscribe({
-      next: res => this.events = res.results ?? [],
+      next: res => this.events = res,
       error: () => {},
     });
 

@@ -16,9 +16,7 @@ export interface HistoricalEvent {
 export class EventsService {
   constructor(private http: HttpClient) {}
 
-  getEvents(): Observable<{ results: HistoricalEvent[] }> {
-    return this.http.get<{ results: HistoricalEvent[] }>(
-      `${environment.apiUrl}/events/?page_size=100`
-    );
+  getEvents(): Observable<HistoricalEvent[]> {
+    return this.http.get<HistoricalEvent[]>(`${environment.apiUrl}/events/`);
   }
 }
