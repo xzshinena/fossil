@@ -17,7 +17,6 @@
   font-size: 22px;
   font-weight: 700;
   color: #58a6ff;
-  letter-spacing: 0.05em;
 }
 
 .subtitle {
@@ -83,7 +82,6 @@
   font-size: 14px;
   color: #58a6ff;
   margin-bottom: 6px;
-  letter-spacing: 0.08em;
 }
 
 .time-slider {
@@ -185,7 +183,6 @@
 .tooltip-date {
   font-size: 10px;
   color: #58a6ff;
-  letter-spacing: 0.06em;
   margin-bottom: 4px;
 }
 
