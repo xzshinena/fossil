@@ -187,10 +187,10 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     nodeMerge.select<SVGTextElement>('text')
       .attr('dy', '0.35em')
-      .attr('x', (d: any) => d.children ? -14 : 14)
+      .attr('x', (d: any) => d.children ? -(this._radius(d.data.health_score) + 4) : this._radius(d.data.health_score) + 4)
       .attr('text-anchor', (d: any) => d.children ? 'end' : 'start')
-      .attr('fill', '#8b949e')
-      .attr('font-size', '11px')
+      .attr('fill', '#b0bac5')
+      .attr('font-size', '12px')
       .text(d => d.data.name);
 
     nodeSel.exit().remove();
