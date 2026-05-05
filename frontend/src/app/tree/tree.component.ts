@@ -132,13 +132,11 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
     const innerW = this.width - this.margin.left - this.margin.right;
     const innerH = this.height - this.margin.top - this.margin.bottom;
 
-    const root = d3.hierarchy<TreeNode>(data);
-    const treeLayout = d3.tree<TreeNode>().size([innerH, innerW]);
-    treeLayout(root);
+    const pointRoot = d3.tree<TreeNode>().size([innerH, innerW])(d3.hierarchy<TreeNode>(data));
 
     // Links
-    const linkSel = this.g.selectAll<SVGPathElement, d3.HierarchyLink<TreeNode>>('.link')
-      .data(root.links(), (d: d3.HierarchyLink<TreeNode>) =>
+    const linkSel = this.g.selectAll<SVGPathElement, d3.HierarchyPointLink<TreeNode>>('.link')
+      .data(pointRoot.links(), (d: d3.HierarchyPointLink<TreeNode>) =>
         `${d.source.data.name}-${d.target.data.name}`);
 
     linkSel.enter()
@@ -149,15 +147,15 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
       .attr('stroke-width', 1.5)
       .merge(linkSel)
       .transition().duration(TRANSITION_DURATION)
-      .attr('d', d3.linkHorizontal<d3.HierarchyLink<TreeNode>, d3.HierarchyPointNode<TreeNode>>()
-        .x(d => (d as any).y)
-        .y(d => (d as any).x) as any);
+      .attr('d', d3.linkHorizontal<d3.HierarchyPointLink<TreeNode>, d3.HierarchyPointNode<TreeNode>>()
+        .x(d => d.y)
+        .y(d => d.x) as any);
 
     linkSel.exit().remove();
 
     // Nodes
     const nodeSel = this.g.selectAll<SVGGElement, d3.HierarchyPointNode<TreeNode>>('.node')
-      .data(root.descendants(), (d: d3.HierarchyNode<TreeNode>) => d.data.name);
+      .data(pointRoot.descendants(), (d: d3.HierarchyPointNode<TreeNode>) => d.data.name);
 
     const nodeEnter = nodeSel.enter()
       .append('g')
