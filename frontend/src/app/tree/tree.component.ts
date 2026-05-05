@@ -147,7 +147,7 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
       .append('path')
       .attr('class', 'link')
       .attr('fill', 'none')
-      .attr('stroke', '#30363d')
+      .attr('stroke', '#3d4450')
       .attr('stroke-width', 1.5)
       .merge(linkSel)
       .transition().duration(TRANSITION_DURATION)
