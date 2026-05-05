@@ -72,11 +72,6 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subs.add(
       this.ws.connectionStatus$.subscribe(s => this.connectionStatus = s)
     );
-    this.subs.add(
-      this.ws.updates$.subscribe(update => {
-        if (this.g) this._applyLiveUpdate(update);
-      })
-    );
   }
 
   ngAfterViewInit(): void {
@@ -87,6 +82,9 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
         next: res => this.events = res,
         error: () => {},
       });
+      this.subs.add(
+        this.ws.updates$.subscribe(update => this._applyLiveUpdate(update))
+      );
     }, 0);
   }
 
