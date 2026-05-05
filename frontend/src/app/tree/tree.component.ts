@@ -176,22 +176,26 @@ export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
     nodeMerge.transition().duration(TRANSITION_DURATION)
       .attr('transform', (d: any) => `translate(${d.y},${d.x})`);
 
+    const isVirtualRoot = (d: d3.HierarchyPointNode<TreeNode>) => d.data.name === 'Origins';
+
     nodeMerge.select<SVGCircleElement>('circle')
       .transition().duration(TRANSITION_DURATION)
-      .attr('r', d => this._radius(d.data.health_score))
-      .attr('fill', d => d.data.health_score != null
-        ? this.colorScale(d.data.health_score)
-        : '#484f58')
-      .attr('stroke', '#58a6ff')
-      .attr('stroke-width', d => d.data.partial ? 1 : 0);
+      .attr('r', d => isVirtualRoot(d) ? 3 : this._radius(d.data.health_score))
+      .attr('fill', d => isVirtualRoot(d)
+        ? 'none'
+        : d.data.health_score != null
+          ? this.colorScale(d.data.health_score)
+          : '#484f58')
+      .attr('stroke', d => isVirtualRoot(d) ? '#3d4450' : '#58a6ff')
+      .attr('stroke-width', d => isVirtualRoot(d) ? 1 : d.data.partial ? 1 : 0);
 
     nodeMerge.select<SVGTextElement>('text')
       .attr('dy', '0.35em')
       .attr('x', (d: any) => d.children ? -(this._radius(d.data.health_score) + 4) : this._radius(d.data.health_score) + 4)
       .attr('text-anchor', (d: any) => d.children ? 'end' : 'start')
-      .attr('fill', '#b0bac5')
+      .attr('fill', d => isVirtualRoot(d) ? '#484f58' : '#b0bac5')
       .attr('font-size', '12px')
-      .text(d => d.data.name);
+      .text(d => isVirtualRoot(d) ? '' : d.data.name);
 
     nodeSel.exit().remove();
   }
