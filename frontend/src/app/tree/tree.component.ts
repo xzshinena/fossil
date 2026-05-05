@@ -1,5 +1,5 @@
 import {
-  Component, ElementRef, OnDestroy, OnInit, ViewChild,
+  AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import * as d3 from 'd3';
@@ -18,7 +18,7 @@ const TRANSITION_DURATION = window.matchMedia('(prefers-reduced-motion: reduce)'
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css'],
 })
-export class TreeComponent implements OnInit, OnDestroy {
+export class TreeComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('treeContainer', { static: true }) containerRef!: ElementRef<HTMLDivElement>;
 
   sliderValue = TOTAL_MONTHS - 1;  // default to Dec 2024
@@ -68,20 +68,26 @@ export class TreeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this._initSvg();
-    this._loadTree();
-    this.eventsService.getEvents().subscribe({
-      next: res => this.events = res,
-      error: () => {},
-    });
-
     this.ws.connect();
     this.subs.add(
       this.ws.connectionStatus$.subscribe(s => this.connectionStatus = s)
     );
     this.subs.add(
-      this.ws.updates$.subscribe(update => this._applyLiveUpdate(update))
+      this.ws.updates$.subscribe(update => {
+        if (this.g) this._applyLiveUpdate(update);
+      })
     );
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this._initSvg();
+      this._loadTree();
+      this.eventsService.getEvents().subscribe({
+        next: res => this.events = res,
+        error: () => {},
+      });
+    }, 0);
   }
 
   ngOnDestroy(): void {
