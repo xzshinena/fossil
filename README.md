@@ -1,4 +1,4 @@
-# Fossil — Language Evolution Platform
+# Fossil — Phylogenic tree of Programming Language Evolution
 
 > An animated phylogenetic tree showing 15 years of programming language evolution,
 > driven by a composite health score from GitHub activity, Stack Overflow sentiment,
@@ -56,7 +56,7 @@
 | GCP | Cloud Run, BigQuery, Cloud Scheduler |
 | Analytics | Power BI (`.pbix` in `powerbi/`) |
 
-## Quickstart
+## Start
 
 ```bash
 # 1. Clone and copy env template
