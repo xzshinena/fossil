@@ -4,10 +4,9 @@
 > driven by a composite health score from GitHub activity, Stack Overflow sentiment,
 > job market demand, and academic citations.
 
-<!-- Demo video — replace with your Loom/YouTube link -->
-<!-- [![Fossil demo](docs/demo-thumbnail.png)](https://loom.com/YOUR_LINK) -->
-
 ---
+<img width="1680" height="1050" alt="Screenshot 2026-05-19 at 12 06 58 AM" src="https://github.com/user-attachments/assets/0db3beaf-be1e-4130-a4da-f4602b125f89" />
+
 
 ## Architecture
 
@@ -108,9 +107,6 @@ docker compose exec backend python manage.py run_ingest --start-year 2020 --end-
 The Power BI report is at `powerbi/fossil.pbix`. Open it in Power BI Desktop,
 then update the BigQuery connection to point at your GCP project.
 
-**Note:** Power BI free tier cannot publish to the web. A static screenshot of
-the report is at `powerbi/fossil-report-screenshot.png`.
-
 ## GCP Deployment
 
 Config files are committed but deployment is not automated (portfolio demo runs
@@ -154,36 +150,3 @@ fossil/
 └── .github/workflows/    GitHub Actions CI
 ```
 
-## Health Score Formula
-
-```
-score = Σ (source_value × weight) / Σ weight   [for available sources only]
-
-Weights:  GitHub activity  30%
-          SO sentiment     25%
-          Job demand       25%
-          Citations        20%
-
-partial = True when any source is missing
-score   = None when ALL sources are missing (no divide-by-zero)
-```
-
-## Historical Events
-
-14 hand-curated annotations are pinned to the timeline:
-
-| Date | Event |
-|---|---|
-| Mar 2012 | Go 1.0 released |
-| Oct 2012 | TypeScript 1.0 public preview |
-| Sep 2014 | Swift 1.0 — Apple replaces Objective-C |
-| Jan 2015 | Python 3 adoption inflection point |
-| May 2015 | Rust 1.0 stable |
-| Aug 2015 | Go 1.5 concurrent GC |
-| Feb 2016 | Kotlin 1.0 stable on JVM |
-| Apr 2016 | Rust first "Most Loved" SO survey win |
-| May 2017 | Kotlin becomes official Android language |
-| Jan 2018 | Python AI/ML surge — TensorFlow & PyTorch mainstream |
-| Aug 2018 | Julia 1.0 stable |
-| Nov 2019 | TypeScript surpasses Ruby and Go on GitHub |
-| Nov 2022 | ChatGPT launches — LLM-era Python explosion |
