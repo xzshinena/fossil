@@ -45,17 +45,21 @@ open http://localhost:4200
 ## Common commands
 
 ```bash
-make dev     # Start services without rebuilding
-make down    # Stop all services
-make seed    # Re-run migrations and seed data
-make test    # Run backend (pytest) and frontend (Karma) tests
-make logs    # Tail logs for all services
-make shell   # Open a Django shell
+make dev            # Start services without rebuilding
+make down           # Stop all services
+make seed           # Re-run migrations and seed data
+make ingest         # Run the full ingest pipeline (requires API keys)
+make ingest-recent  # Ingest current year only
+make test           # Run backend (pytest) and frontend (Karma) tests
+make logs           # Tail logs for all services
+make shell          # Open a Django shell
 ```
 
 ## Optional: API keys
 
-The app runs fully without external API keys. Keys are only needed if you want to re-run the data ingest pipeline:
+The app runs fully without external API keys. Keys are only needed if you want to re-run the data ingest pipeline.
+
+Add them to your `.env` file, then use `make ingest`:
 
 | Key | Where to get it | What it unlocks |
 |---|---|---|
@@ -63,7 +67,17 @@ The app runs fully without external API keys. Keys are only needed if you want t
 | `SEMANTIC_SCHOLAR_API_KEY` | https://semanticscholar.org/product/api | Academic citation data |
 | `GOOGLE_APPLICATION_CREDENTIALS` | GCP service account JSON | BigQuery + GitHub Archive |
 
-Add keys to your `.env` file, then run `make seed` to ingest.
+### Running the ingest pipeline
+
+```bash
+make ingest                          # all sources, full history (2011-2024)
+make ingest-recent                   # current year only — good for testing
+make ingest SOURCE=github            # one source only
+make ingest START_YEAR=2020 END_YEAR=2024
+make ingest YEAR=2023                # recompute health scores for one year only
+```
+
+All variants run the full pipeline: fetch → write to MongoDB → compute composite health scores → persist to MySQL. The `--skip-scores` flag is available via the raw management command if you need it.
 
 ## Project structure
 

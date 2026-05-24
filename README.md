@@ -80,15 +80,14 @@ Services started by `docker compose up`:
 
 ## Running the ingest pipeline
 
+Requires API keys in `.env` — see [CONTRIBUTING.md](CONTRIBUTING.md#optional-api-keys).
+
 ```bash
-# Ingest all sources for a specific year (requires API keys in .env)
-docker compose exec backend python manage.py run_ingest --year 2024
-
-# Ingest a specific source only
-docker compose exec backend python manage.py run_ingest --source github --year 2023
-
-# Ingest a date range
-docker compose exec backend python manage.py run_ingest --start-year 2020 --end-year 2024
+make ingest                          # full pipeline, all sources, 2011-2024
+make ingest-recent                   # current year only
+make ingest SOURCE=github            # one source only
+make ingest START_YEAR=2020 END_YEAR=2024
+make ingest YEAR=2023                # recompute health scores for one year
 ```
 
 ## Power BI Report
