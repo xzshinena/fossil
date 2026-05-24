@@ -38,6 +38,8 @@ spec:
                 secretKeyRef:
                   name: fossil-db-password
                   key: latest
+            - name: SCHEDULER_SA_EMAIL
+              value: fossil-scheduler@PROJECT_ID.iam.gserviceaccount.com
           resources:
             limits:
               cpu: "1"

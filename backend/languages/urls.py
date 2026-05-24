@@ -10,4 +10,5 @@ router.register(r'events', views.HistoricalEventViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('tree/', views.tree_view, name='tree'),
+    path('ingest/run/', views.ingest_run_view, name='ingest-run'),
 ]

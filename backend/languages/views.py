@@ -1,8 +1,73 @@
+import logging
+import os
+import threading
+from datetime import datetime
+
+from django.conf import settings
+from django.core.management import call_command
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 from .models import Language, HealthScore, HistoricalEvent
 from .serializers import LanguageSerializer, HealthScoreSerializer, HistoricalEventSerializer
+
+logger = logging.getLogger(__name__)
+
+_SCHEDULER_SA_EMAIL = os.environ.get('SCHEDULER_SA_EMAIL', '')
+
+
+def _verify_oidc_token(request) -> bool:
+    if settings.DEBUG:
+        return True
+    auth = request.META.get('HTTP_AUTHORIZATION', '')
+    if not auth.startswith('Bearer '):
+        return False
+    token = auth[len('Bearer '):]
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+        claims = id_token.verify_oauth2_token(token, google_requests.Request())
+        return (
+            claims.get('email') == _SCHEDULER_SA_EMAIL
+            and claims.get('email_verified', False)
+        )
+    except Exception:
+        logger.exception('OIDC token verification failed')
+        return False
+
+
+def _run_ingest_background(source: str, incremental: bool) -> None:
+    now = datetime.utcnow()
+    try:
+        if incremental:
+            call_command('run_ingest', source=source, start_year=now.year, end_year=now.year)
+        else:
+            call_command('run_ingest', source='all', start_year=2011, end_year=now.year)
+    except Exception:
+        logger.exception('run_ingest failed (source=%s incremental=%s)', source, incremental)
+
+
+@csrf_exempt
+@require_POST
+def ingest_run_view(request):
+    if not _verify_oidc_token(request):
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    source = request.GET.get('source', 'all')
+    incremental = request.GET.get('incremental', 'false').lower() == 'true'
+
+    thread = threading.Thread(
+        target=_run_ingest_background,
+        args=(source, incremental),
+        daemon=True,
+    )
+    thread.start()
+
+    return JsonResponse({'status': 'accepted', 'source': source, 'incremental': incremental}, status=202)
 
 
 class LanguageViewSet(viewsets.ReadOnlyModelViewSet):
