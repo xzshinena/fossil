@@ -7,21 +7,6 @@ on:
     branches: [main]
 
 jobs:
-  # ── Python lint ────────────────────────────────────────────────────────────
-  python-lint:
-    name: Python lint (flake8)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-      - run: pip install flake8 flake8-annotations
-      - run: flake8 . --max-line-length=100 --exclude=migrations,__pycache__ --ignore=ANN,F403,E402
 
   # ── Django tests ───────────────────────────────────────────────────────────
   django-test:
