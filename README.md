@@ -58,24 +58,13 @@
 ## Start
 
 ```bash
-# 1. Clone and copy env template
 git clone https://github.com/YOUR_USERNAME/fossil.git && cd fossil
-cp .env.example .env          # fill in ADZUNA_APP_ID, ADZUNA_APP_KEY
-
-# 2. (Optional) Add GCP credentials for BigQuery ingest
-#    Place your service account JSON at data/gcp-credentials.json
-
-# 3. Start all services
-docker compose up --build
-
-# 4. In a separate terminal — run migrations and seed data
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py seed_so      # loads language tree + synthetic scores
-docker compose exec backend python manage.py seed_events  # loads historical event annotations
-
-# 5. Open the app
+cp .env.example .env   # API keys are optional — the app runs without them
+make setup             # builds images, starts services, migrates, and seeds data
 open http://localhost:4200
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for common commands, troubleshooting, and where to start.
 
 Services started by `docker compose up`:
 
@@ -107,22 +96,6 @@ docker compose exec backend python manage.py run_ingest --start-year 2020 --end-
 The Power BI report is at `powerbi/fossil.pbix`. Open it in Power BI Desktop,
 then update the BigQuery connection to point at your GCP project.
 
-## GCP Deployment
-
-Config files are committed but deployment is not automated (portfolio demo runs
-fully via Docker Compose).
-
-```bash
-# Deploy backend to Cloud Run
-gcloud run services replace cloudrun/backend.yaml --region=us-central1
-
-# Deploy streaming service
-gcloud run services replace cloudrun/streaming.yaml --region=us-central1
-
-# Create BigQuery dataset and table
-bq mk --dataset PROJECT_ID:fossil
-bq mk --table PROJECT_ID:fossil.health_scores bq/health_scores.json
-```
 
 ## Project Structure
 
