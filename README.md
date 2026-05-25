@@ -104,7 +104,7 @@ fossil/
 │   ├── fossil/           settings (base/dev/prod), asgi.py, urls.py
 │   ├── languages/        models, views, serializers, consumers, migrations
 │   └── ingest/           5 ETL scripts + compute_health_score.py
-├── streaming/            Scala streaming service
+├── streaming/            Scala streaming service (see [streaming/README.md](streaming/README.md))
 │   └── src/main/scala/fossil/
 │       ├── Main.scala
 │       ├── StreamingPipeline.scala
