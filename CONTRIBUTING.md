@@ -94,6 +94,39 @@ fossil/
 └── cloudrun/         GCP deployment configs
 ```
 
+## Adding a language to lineage.json
+
+`data/lineage.json` is the hand-curated file that defines the phylogenetic
+tree — which languages are roots and which are children of which.
+
+### Schema
+
+Each entry has exactly two fields:
+
+| Field    | Type              | Description                                              |
+| -------- | ----------------- | -------------------------------------------------------- |
+| `name`   | string            | Must exactly match a name in the `LANGUAGES` list in `backend/ingest/ingest_github.py` |
+| `parent` | string \| null   | Name of the parent language, or `null` for root languages |
+
+Example:
+
+```json
+{ "name": "Kotlin", "parent": "Java" },
+{ "name": "Java",   "parent": null  }
+```
+
+### Steps to add a language
+
+1. Add an entry to `data/lineage.json`
+2. Add the same name to the `LANGUAGES` list in `backend/ingest/ingest_github.py`
+3. Run `make seed` to reload the tree
+
+### Constraints
+
+- Names must be **unique** across the file
+- The `parent` value must already exist as a `name` in the file
+- Circular references will cause the tree renderer to hang
+
 ## Where to start
 
 Not sure what to work on? Good entry points:
